@@ -1,0 +1,15 @@
+# Swift build artifacts
+.build/
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+.swiftpm/xcode/
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
+CLAUDE.md
