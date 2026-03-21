@@ -1,5 +1,8 @@
 # swift-microsoft-graph
 
+> **Warning**
+> This package is in early development. Many features are not yet implemented and the API is subject to breaking changes. **Do not use in production.**
+
 A lightweight Swift package for interacting with the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/overview). Zero external dependencies — built entirely on `URLSession` and Swift concurrency.
 
 ## Requirements
