@@ -1,5 +1,5 @@
 extension GraphClient {
-    public func users<Target: GraphUserTarget>(version: Target) -> GraphUserClient<Target> {
-        GraphUserClient(client: self, target: version)
+    public func users<Target: UsersTarget>(version: Target) -> UserClient<Target> {
+        UserClient(client: self, target: version)
     }
 }

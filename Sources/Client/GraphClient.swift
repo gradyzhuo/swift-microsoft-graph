@@ -3,6 +3,8 @@ import Foundation
 public enum GraphAPIVersion: String, Sendable {
     case v1_0 = "v1.0"
     case beta = "beta"
+
+    public static let latest: GraphAPIVersion = .v1_0
 }
 
 public struct GraphClient: Sendable {

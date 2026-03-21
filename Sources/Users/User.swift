@@ -1,5 +1,5 @@
 // v1.0 user response model
-public struct GraphUser: Sendable, Decodable {
+public struct User: Sendable, Decodable {
     public let id: String
     public let displayName: String?
     public let mail: String?

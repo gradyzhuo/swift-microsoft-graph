@@ -1,6 +1,6 @@
 import Foundation
 
-public struct GraphUserClient<Target: GraphUserTarget>: Sendable {
+public struct UserClient<Target: UsersTarget>: Sendable {
     private let client: GraphClient
     public let target: Target
 
@@ -12,8 +12,8 @@ public struct GraphUserClient<Target: GraphUserTarget>: Sendable {
 
 // MARK: - v1.0
 
-extension GraphUserClient where Target == V1GraphUsersTarget {
-    public func allUsers() async throws -> [GraphUser] {
+extension UserClient where Target == V1UsersTarget {
+    public func allUsers() async throws -> [User] {
         let select = "id,displayName,mail,userPrincipalName,givenName,surname,jobTitle,businessPhones,mobilePhone,officeLocation,preferredLanguage"
         return try await fetchAll(path: "/users?$select=\(select)", version: target.apiVersion)
     }
@@ -21,15 +21,15 @@ extension GraphUserClient where Target == V1GraphUsersTarget {
 
 // MARK: - beta
 
-extension GraphUserClient where Target == BetaGraphUsersTarget {
-    public func allUsers() async throws -> [GraphBetaUser] {
+extension UserClient where Target == BetaUsersTarget {
+    public func allUsers() async throws -> [User.Beta] {
         return try await fetchAll(path: "/users", version: target.apiVersion)
     }
 }
 
 // MARK: - Pagination helper
 
-private extension GraphUserClient {
+private extension UserClient {
     func fetchAll<T: Decodable & Sendable>(path: String, version: GraphAPIVersion) async throws -> [T] {
         var results: [T] = []
 
