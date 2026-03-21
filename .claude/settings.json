@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | { read -r cmd; echo \"$cmd\" | grep -q 'git commit' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A git commit was just executed. Please now invoke the readme-check skill to check if README.md needs updating.\"}}'; } 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
