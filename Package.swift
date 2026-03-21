@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "MicrosoftGraph",
+    name: "swift-microsoft-graph",
     platforms: [.macOS(.v14)],
     products: [
         .library(name: "MicrosoftGraph", targets: ["MicrosoftGraph"]),
