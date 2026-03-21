@@ -1,12 +1,13 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
-            "type": "command",
-            "command": "jq -r '.tool_input.command // \"\"' | { read -r cmd; echo \"$cmd\" | grep -q 'git commit' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A git commit was just executed. Please now invoke the readme-check skill to check if README.md needs updating.\"}}'; } 2>/dev/null || true"
+            "type": "agent",
+            "prompt": "Check if the Bash command about to be executed is a `git commit` command.\n\nThe hook input is: $ARGUMENTS\n\nIf it is NOT a git commit command, do nothing and exit immediately.\n\nIf it IS a git commit command:\n1. Run `git diff --cached --name-only` to see what files are staged\n2. Read the current README.md\n3. Determine if any staged changes affect public API, requirements, or features described in README.md (new/removed/renamed public types or methods, changes to Package.swift requirements, new modules)\n4. If README needs updating: edit README.md to reflect the changes, then run `git add README.md`\n5. If README is already up to date: do nothing\n\nDo not block the commit — always allow it to proceed.",
+            "timeout": 60
           }
         ]
       }
