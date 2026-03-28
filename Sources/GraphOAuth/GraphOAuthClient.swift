@@ -1,7 +1,9 @@
 import Foundation
+import GraphAuth
+import GraphClient
+import OpenAPIURLSession
 
 public struct GraphOAuthClient: Sendable {
-    private static let graphBaseURL = "https://graph.microsoft.com"
     private let config: GraphOAuthConfig
 
     public init(config: GraphOAuthConfig) {
@@ -9,6 +11,8 @@ public struct GraphOAuthClient: Sendable {
     }
 
     /// Exchange an authorization code + PKCE verifier for MS tokens (confidential client).
+    /// Uses URLSession directly — this calls Azure AD (login.microsoftonline.com),
+    /// which is outside the Microsoft Graph OpenAPI spec.
     public func exchangeCodeForToken(
         code: String,
         codeVerifier: String,
@@ -39,17 +43,35 @@ public struct GraphOAuthClient: Sendable {
 
     /// Fetch the signed-in user's profile from Microsoft Graph using a delegated access token.
     public func me(accessToken: String) async throws -> GraphUserProfile {
-        let url = URL(string: "\(Self.graphBaseURL)/v1.0/me")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let http = response as? HTTPURLResponse
-            let body = String(data: data, encoding: .utf8) ?? ""
-            throw GraphError.requestFailed(statusCode: http?.statusCode ?? 0, body: body)
+        let middleware = GraphBearerMiddleware { accessToken }
+        let apiClient = Client(
+            serverURL: URL(string: "https://graph.microsoft.com")!,
+            transport: URLSessionTransport(),
+            middlewares: [middleware]
+        )
+        let response = try await apiClient.me_period_user_period_GetUser()
+        switch response {
+        case .successful(_, let ok):
+            switch ok.body {
+            case .json(let profile):
+                return try GraphUserProfile(schema: profile)
+            }
+        case .clientError(let statusCode, _), .serverError(let statusCode, _),
+             .undocumented(let statusCode, _):
+            throw GraphError.requestFailed(statusCode: statusCode, body: "")
         }
-        return try JSONDecoder().decode(GraphUserProfile.self, from: data)
+    }
+}
+
+private let iso8601Encoder: JSONEncoder = {
+    let e = JSONEncoder()
+    e.dateEncodingStrategy = .iso8601
+    return e
+}()
+
+private extension GraphUserProfile {
+    init(schema: Components.Schemas.microsoft_period_graph_period_user) throws {
+        let data = try iso8601Encoder.encode(schema)
+        self = try JSONDecoder().decode(GraphUserProfile.self, from: data)
     }
 }

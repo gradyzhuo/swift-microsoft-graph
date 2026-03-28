@@ -1,3 +1,5 @@
+import GraphClient
+
 public protocol UsersTarget: Sendable {
     var apiVersion: GraphAPIVersion { get }
 }
