@@ -1,6 +1,6 @@
 import Foundation
 
-actor GraphTokenProvider {
+public actor GraphTokenProvider {
     private struct CachedToken {
         let accessToken: String
         let expiresAt: Date
@@ -12,11 +12,11 @@ actor GraphTokenProvider {
     private let credential: GraphCredential
     private var cachedToken: CachedToken?
 
-    init(credential: GraphCredential) {
+    public init(credential: GraphCredential) {
         self.credential = credential
     }
 
-    func accessToken() async throws -> String {
+    public func accessToken() async throws -> String {
         if let cached = cachedToken, !cached.isExpired {
             return cached.accessToken
         }

@@ -1,0 +1,128 @@
+openapi: "3.1.0"
+info:
+  title: Microsoft Graph – Me
+  version: "1.0"
+  description: |
+    Copied from the official Microsoft Graph OpenAPI v1.0 spec.
+    Source: https://github.com/microsoftgraph/msgraph-metadata/blob/master/openapi/v1.0/openapi.yaml
+    Contains only the /me endpoint.
+servers:
+  - url: https://graph.microsoft.com
+
+paths:
+  /v1.0/me:
+    get:
+      tags:
+        - me.user
+      summary: Get a user
+      description: >
+        Retrieve the properties and relationships of user object. This operation
+        returns by default only a subset of the more commonly used properties for
+        each user.
+      externalDocs:
+        description: Find more info here
+        url: https://learn.microsoft.com/graph/api/user-get?view=graph-rest-1.0
+      operationId: me.user.GetUser
+      parameters:
+        - name: ConsistencyLevel
+          in: header
+          description: Indicates the requested consistency level.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Select properties to be returned
+          style: form
+          explode: false
+          schema:
+            uniqueItems: true
+            type: array
+            items:
+              type: string
+      responses:
+        2XX:
+          description: Retrieved entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/microsoft.graph.user"
+        4XX:
+          $ref: "#/components/responses/error"
+        5XX:
+          $ref: "#/components/responses/error"
+      x-ms-docs-operation-type: operation
+
+components:
+  schemas:
+    microsoft.graph.user:
+      title: user
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the user.
+        displayName:
+          type: string
+          description: The name displayed in the address book for the user.
+          nullable: true
+        givenName:
+          type: string
+          description: The given name (first name) of the user.
+          nullable: true
+        surname:
+          type: string
+          description: The user's family name (surname).
+          nullable: true
+        mail:
+          type: string
+          description: The SMTP address for the user.
+          nullable: true
+        userPrincipalName:
+          type: string
+          description: The user principal name (UPN) of the user.
+          nullable: true
+        jobTitle:
+          type: string
+          nullable: true
+        officeLocation:
+          type: string
+          nullable: true
+        mobilePhone:
+          type: string
+          nullable: true
+        businessPhones:
+          type: array
+          items:
+            type: string
+        preferredLanguage:
+          type: string
+          nullable: true
+
+    ODataErrors.ODataError:
+      title: ODataError
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          $ref: "#/components/schemas/ODataErrors.MainError"
+
+    ODataErrors.MainError:
+      title: MainError
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    error:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ODataErrors.ODataError"

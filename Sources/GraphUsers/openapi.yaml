@@ -1,0 +1,761 @@
+openapi: "3.1.0"
+info:
+  title: Microsoft Graph – Users
+  version: "1.0"
+  description: |
+    Copied from the official Microsoft Graph OpenAPI specs.
+    v1.0 source: https://github.com/microsoftgraph/msgraph-metadata/blob/master/openapi/v1.0/openapi.yaml
+    beta source:  https://github.com/microsoftgraph/msgraph-metadata/blob/master/openapi/beta/openapi.yaml
+    Contains only the list-users endpoints (v1.0 and beta).
+servers:
+  - url: https://graph.microsoft.com
+
+paths:
+  /v1.0/users:
+    get:
+      tags:
+        - users.user
+      summary: List users
+      description: Retrieve a list of user objects.
+      externalDocs:
+        description: Find more info here
+        url: https://learn.microsoft.com/graph/api/user-list?view=graph-rest-1.0
+      operationId: users.user.ListUser
+      parameters:
+        - name: ConsistencyLevel
+          in: header
+          description: Indicates the requested consistency level.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Select properties to be returned
+          style: form
+          explode: false
+          schema:
+            uniqueItems: true
+            type: array
+            items:
+              type: string
+        - name: $filter
+          in: query
+          description: Filter items by property values
+          schema:
+            type: string
+        - name: $top
+          in: query
+          description: Show only the first n items
+          schema:
+            minimum: 0
+            type: integer
+        - name: $skiptoken
+          in: query
+          description: >
+            Opaque pagination token returned in @odata.nextLink.
+            Not in the official spec but required to follow pagination links.
+          schema:
+            type: string
+      responses:
+        2XX:
+          description: Retrieved collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/microsoft.graph.userCollectionResponse"
+        4XX:
+          $ref: "#/components/responses/error"
+        5XX:
+          $ref: "#/components/responses/error"
+      x-ms-pageable:
+        nextLinkName: "@odata.nextLink"
+        operationName: listMore
+      x-ms-docs-operation-type: operation
+
+  /beta/users:
+    get:
+      tags:
+        - users.user
+      summary: List users (beta)
+      description: >
+        Retrieve a list of user objects.
+        This API also returns agentUser objects.
+      externalDocs:
+        description: Find more info here
+        url: https://learn.microsoft.com/graph/api/user-list?view=graph-rest-beta
+      operationId: users.user.ListUserBeta
+      parameters:
+        - name: ConsistencyLevel
+          in: header
+          description: Indicates the requested consistency level.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Select properties to be returned
+          style: form
+          explode: false
+          schema:
+            uniqueItems: true
+            type: array
+            items:
+              type: string
+        - name: $skiptoken
+          in: query
+          description: Opaque pagination token returned in @odata.nextLink.
+          schema:
+            type: string
+      responses:
+        2XX:
+          description: Retrieved collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/microsoft.graph.betaUserCollectionResponse"
+        4XX:
+          $ref: "#/components/responses/error"
+        5XX:
+          $ref: "#/components/responses/error"
+      x-ms-pageable:
+        nextLinkName: "@odata.nextLink"
+        operationName: listMore
+      x-ms-docs-operation-type: operation
+
+components:
+  schemas:
+    # ── Collection responses ────────────────────────────────────────────────
+    microsoft.graph.userCollectionResponse:
+      title: Collection of user
+      type: object
+      properties:
+        "@odata.count":
+          type: integer
+          format: int64
+          nullable: true
+        "@odata.nextLink":
+          type: string
+          nullable: true
+        value:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.user"
+
+    microsoft.graph.betaUserCollectionResponse:
+      title: Collection of user (beta)
+      type: object
+      properties:
+        "@odata.count":
+          type: integer
+          format: int64
+          nullable: true
+        "@odata.nextLink":
+          type: string
+          nullable: true
+        value:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.betaUser"
+
+    # ── v1.0 user ────────────────────────────────────────────────────────────
+    microsoft.graph.user:
+      title: user
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for an entity.
+        accountEnabled:
+          type: boolean
+          description: "true if the account is enabled; otherwise, false."
+          nullable: true
+        businessPhones:
+          type: array
+          items:
+            type: string
+          description: The telephone numbers for the user.
+        city:
+          type: string
+          nullable: true
+        companyName:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        department:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          description: The name displayed in the address book for the user.
+          nullable: true
+        employeeId:
+          type: string
+          nullable: true
+        givenName:
+          type: string
+          description: The given name (first name) of the user.
+          nullable: true
+        jobTitle:
+          type: string
+          nullable: true
+        mail:
+          type: string
+          description: The SMTP address for the user.
+          nullable: true
+        mailNickname:
+          type: string
+          nullable: true
+        mobilePhone:
+          type: string
+          nullable: true
+        officeLocation:
+          type: string
+          nullable: true
+        postalCode:
+          type: string
+          nullable: true
+        preferredLanguage:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        streetAddress:
+          type: string
+          nullable: true
+        surname:
+          type: string
+          description: The user's family name (surname).
+          nullable: true
+        usageLocation:
+          type: string
+          nullable: true
+        userPrincipalName:
+          type: string
+          description: The user principal name (UPN) of the user.
+          nullable: true
+        userType:
+          type: string
+          nullable: true
+        assignedLicenses:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.assignedLicense"
+        assignedPlans:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.assignedPlan"
+        provisionedPlans:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.provisionedPlan"
+        proxyAddresses:
+          type: array
+          items:
+            type: string
+        onPremisesSyncEnabled:
+          type: boolean
+          nullable: true
+        onPremisesLastSyncDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        onPremisesDomainName:
+          type: string
+          nullable: true
+        onPremisesImmutableId:
+          type: string
+          nullable: true
+        onPremisesSecurityIdentifier:
+          type: string
+          nullable: true
+        onPremisesSamAccountName:
+          type: string
+          nullable: true
+        onPremisesUserPrincipalName:
+          type: string
+          nullable: true
+
+    # ── beta user (superset of v1.0) ─────────────────────────────────────────
+    microsoft.graph.betaUser:
+      title: user (beta)
+      type: object
+      properties:
+        id:
+          type: string
+        accountEnabled:
+          type: boolean
+          nullable: true
+        ageGroup:
+          type: string
+          nullable: true
+        agentIdentityBlueprintId:
+          type: string
+          nullable: true
+        assignedLicenses:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.assignedLicense"
+        assignedPlans:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.assignedPlan"
+        authorizationInfo:
+          $ref: "#/components/schemas/microsoft.graph.authorizationInfo"
+        businessPhones:
+          type: array
+          items:
+            type: string
+        city:
+          type: string
+          nullable: true
+        cloudRealtimeCommunicationInfo:
+          $ref: "#/components/schemas/microsoft.graph.cloudRealtimeCommunicationInfo"
+        companyName:
+          type: string
+          nullable: true
+        consentProvidedForMinor:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        creationType:
+          type: string
+          nullable: true
+        deletedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        department:
+          type: string
+          nullable: true
+        deviceKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.deviceKey"
+        displayName:
+          type: string
+          nullable: true
+        employeeHireDate:
+          type: string
+          format: date-time
+          nullable: true
+        employeeId:
+          type: string
+          nullable: true
+        employeeLeaveDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        employeeOrgData:
+          $ref: "#/components/schemas/microsoft.graph.employeeOrgData"
+        employeeType:
+          type: string
+          nullable: true
+        externalUserConvertedOn:
+          type: string
+          format: date-time
+          nullable: true
+        externalUserState:
+          type: string
+          nullable: true
+        externalUserStateChangeDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        faxNumber:
+          type: string
+          nullable: true
+        givenName:
+          type: string
+          nullable: true
+        identities:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.objectIdentity"
+        identityParentId:
+          type: string
+          nullable: true
+        imAddresses:
+          type: array
+          items:
+            type: string
+        infoCatalogs:
+          type: array
+          items:
+            type: string
+        isLicenseReconciliationNeeded:
+          type: boolean
+          nullable: true
+        isManagementRestricted:
+          type: boolean
+          nullable: true
+        isResourceAccount:
+          type: boolean
+          nullable: true
+        jobTitle:
+          type: string
+          nullable: true
+        legalAgeGroupClassification:
+          type: string
+          nullable: true
+        mail:
+          type: string
+          nullable: true
+        mailNickname:
+          type: string
+          nullable: true
+        mobilePhone:
+          type: string
+          nullable: true
+        officeLocation:
+          type: string
+          nullable: true
+        onPremisesDistinguishedName:
+          type: string
+          nullable: true
+        onPremisesDomainName:
+          type: string
+          nullable: true
+        onPremisesExtensionAttributes:
+          $ref: "#/components/schemas/microsoft.graph.onPremisesExtensionAttributes"
+        onPremisesImmutableId:
+          type: string
+          nullable: true
+        onPremisesLastSyncDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        onPremisesObjectIdentifier:
+          type: string
+          nullable: true
+        onPremisesProvisioningErrors:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.onPremisesProvisioningError"
+        onPremisesSamAccountName:
+          type: string
+          nullable: true
+        onPremisesSecurityIdentifier:
+          type: string
+          nullable: true
+        onPremisesSipInfo:
+          $ref: "#/components/schemas/microsoft.graph.onPremisesSipInfo"
+        onPremisesSyncEnabled:
+          type: boolean
+          nullable: true
+        onPremisesUserPrincipalName:
+          type: string
+          nullable: true
+        otherMails:
+          type: array
+          items:
+            type: string
+        passwordPolicies:
+          type: string
+          nullable: true
+        passwordProfile:
+          $ref: "#/components/schemas/microsoft.graph.passwordProfile"
+        postalCode:
+          type: string
+          nullable: true
+        preferredDataLocation:
+          type: string
+          nullable: true
+        preferredLanguage:
+          type: string
+          nullable: true
+        provisionedPlans:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.provisionedPlan"
+        proxyAddresses:
+          type: array
+          items:
+            type: string
+        refreshTokensValidFromDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        securityIdentifier:
+          type: string
+          nullable: true
+        serviceProvisioningErrors:
+          type: array
+          items:
+            $ref: "#/components/schemas/microsoft.graph.serviceProvisioningError"
+        showInAddressList:
+          type: boolean
+          nullable: true
+        signInSessionsValidFromDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        streetAddress:
+          type: string
+          nullable: true
+        surname:
+          type: string
+          nullable: true
+        usageLocation:
+          type: string
+          nullable: true
+        userPrincipalName:
+          type: string
+          nullable: true
+        userType:
+          type: string
+          nullable: true
+
+    # ── Sub-schemas ─────────────────────────────────────────────────────────
+    microsoft.graph.assignedLicense:
+      title: assignedLicense
+      type: object
+      properties:
+        disabledPlans:
+          type: array
+          items:
+            type: string
+        skuId:
+          type: string
+          nullable: true
+
+    microsoft.graph.assignedPlan:
+      title: assignedPlan
+      type: object
+      properties:
+        assignedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        capabilityStatus:
+          type: string
+          nullable: true
+        service:
+          type: string
+          nullable: true
+        servicePlanId:
+          type: string
+          nullable: true
+
+    microsoft.graph.provisionedPlan:
+      title: provisionedPlan
+      type: object
+      properties:
+        capabilityStatus:
+          type: string
+          nullable: true
+        provisioningStatus:
+          type: string
+          nullable: true
+        service:
+          type: string
+          nullable: true
+
+    microsoft.graph.authorizationInfo:
+      title: authorizationInfo
+      type: object
+      properties:
+        certificateUserIds:
+          type: array
+          items:
+            type: string
+
+    microsoft.graph.cloudRealtimeCommunicationInfo:
+      title: cloudRealtimeCommunicationInfo
+      type: object
+      properties:
+        isSipEnabled:
+          type: boolean
+          nullable: true
+
+    microsoft.graph.deviceKey:
+      title: deviceKey
+      type: object
+      properties:
+        deviceId:
+          type: string
+          nullable: true
+        keyMaterial:
+          type: string
+          nullable: true
+        keyType:
+          type: string
+          nullable: true
+
+    microsoft.graph.employeeOrgData:
+      title: employeeOrgData
+      type: object
+      properties:
+        costCenter:
+          type: string
+          nullable: true
+        division:
+          type: string
+          nullable: true
+
+    microsoft.graph.objectIdentity:
+      title: objectIdentity
+      type: object
+      properties:
+        issuer:
+          type: string
+          nullable: true
+        issuerAssignedId:
+          type: string
+          nullable: true
+        signInType:
+          type: string
+          nullable: true
+
+    microsoft.graph.onPremisesExtensionAttributes:
+      title: onPremisesExtensionAttributes
+      type: object
+      properties:
+        extensionAttribute1:
+          type: string
+          nullable: true
+        extensionAttribute2:
+          type: string
+          nullable: true
+        extensionAttribute3:
+          type: string
+          nullable: true
+        extensionAttribute4:
+          type: string
+          nullable: true
+        extensionAttribute5:
+          type: string
+          nullable: true
+        extensionAttribute6:
+          type: string
+          nullable: true
+        extensionAttribute7:
+          type: string
+          nullable: true
+        extensionAttribute8:
+          type: string
+          nullable: true
+        extensionAttribute9:
+          type: string
+          nullable: true
+        extensionAttribute10:
+          type: string
+          nullable: true
+        extensionAttribute11:
+          type: string
+          nullable: true
+        extensionAttribute12:
+          type: string
+          nullable: true
+        extensionAttribute13:
+          type: string
+          nullable: true
+        extensionAttribute14:
+          type: string
+          nullable: true
+        extensionAttribute15:
+          type: string
+          nullable: true
+
+    microsoft.graph.onPremisesProvisioningError:
+      title: onPremisesProvisioningError
+      type: object
+      properties:
+        category:
+          type: string
+          nullable: true
+        occurredDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        propertyCausingError:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+
+    microsoft.graph.onPremisesSipInfo:
+      title: onPremisesSipInfo
+      type: object
+      properties:
+        isSipEnabled:
+          type: boolean
+          nullable: true
+        sipDeploymentLocation:
+          type: string
+          nullable: true
+        sipPrimaryAddress:
+          type: string
+          nullable: true
+
+    microsoft.graph.passwordProfile:
+      title: passwordProfile
+      type: object
+      properties:
+        forceChangePasswordNextSignIn:
+          type: boolean
+          nullable: true
+        forceChangePasswordNextSignInWithMfa:
+          type: boolean
+          nullable: true
+        password:
+          type: string
+          nullable: true
+
+    microsoft.graph.serviceProvisioningError:
+      title: serviceProvisioningError
+      type: object
+      properties:
+        createdDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        isResolved:
+          type: boolean
+          nullable: true
+        serviceInstance:
+          type: string
+          nullable: true
+
+    ODataErrors.ODataError:
+      title: ODataError
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          $ref: "#/components/schemas/ODataErrors.MainError"
+
+    ODataErrors.MainError:
+      title: MainError
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    error:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ODataErrors.ODataError"
