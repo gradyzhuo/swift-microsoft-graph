@@ -58,6 +58,8 @@ public actor GraphTokenProvider {
                 body = ""
             }
             throw GraphError.authenticationFailed(statusCode: statusCode, body: body)
+        case .serverError(let statusCode, _):
+            throw GraphError.authenticationFailed(statusCode: statusCode, body: "")
         case .undocumented(let statusCode, _):
             throw GraphError.authenticationFailed(statusCode: statusCode, body: "")
         }

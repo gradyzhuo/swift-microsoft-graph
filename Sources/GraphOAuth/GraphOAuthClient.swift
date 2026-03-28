@@ -5,9 +5,18 @@ import OpenAPIAsyncHTTPClient
 
 public struct GraphOAuthClient: Sendable {
     private let config: GraphOAuthConfig
+    // Shared transport — one HTTPClient/thread-pool for all calls
+    private let transport: AsyncHTTPClientTransport
+    // Shared client for Azure AD (no per-call middleware needed)
+    private let azureClient: Client
 
     public init(config: GraphOAuthConfig) {
         self.config = config
+        self.transport = AsyncHTTPClientTransport()
+        self.azureClient = Client(
+            serverURL: URL(string: "https://login.microsoftonline.com")!,
+            transport: transport
+        )
     }
 
     /// Exchange an authorization code + PKCE verifier for MS tokens (confidential client).
@@ -18,11 +27,6 @@ public struct GraphOAuthClient: Sendable {
         codeVerifier: String,
         scopes: [String]
     ) async throws -> GraphOAuthTokenResponse {
-        // Azure AD lives at a different host than graph.microsoft.com
-        let azureClient = Client(
-            serverURL: URL(string: "https://login.microsoftonline.com")!,
-            transport: AsyncHTTPClientTransport()
-        )
         let response = try await azureClient.exchangeCodeForToken(
             path: .init(tenantId: config.tenantId),
             body: .urlEncodedForm(.init(
@@ -65,7 +69,7 @@ public struct GraphOAuthClient: Sendable {
         let middleware = GraphBearerMiddleware { accessToken }
         let apiClient = Client(
             serverURL: URL(string: "https://graph.microsoft.com")!,
-            transport: AsyncHTTPClientTransport(),
+            transport: transport,
             middlewares: [middleware]
         )
         let response = try await apiClient.me_period_user_period_GetUser()
