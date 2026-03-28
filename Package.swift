@@ -3,7 +3,7 @@ import PackageDescription
 
 private let openAPIProducts: [Target.Dependency] = [
     .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-    .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+    .product(name: "OpenAPIAsyncHTTPClient", package: "swift-openapi-async-http-client"),
 ]
 
 private let openAPIGeneratorPlugin: [Target.PluginUsage] = [
@@ -19,11 +19,15 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.3.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.5.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+        .package(url: "https://github.com/swift-server/swift-openapi-async-http-client", from: "1.0.0"),
     ],
     targets: [
         // ── Auth ──────────────────────────────────────────────────────────
-        .target(name: "GraphAuth"),
+        .target(
+            name: "GraphAuth",
+            dependencies: openAPIProducts,
+            plugins: openAPIGeneratorPlugin
+        ),
 
         // ── Client (shared bearer middleware + GraphClient facade) ─────────
         .target(
