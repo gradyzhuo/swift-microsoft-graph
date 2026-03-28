@@ -1,0 +1,78 @@
+openapi: "3.1.0"
+info:
+  title: Azure AD Token – Client Credentials
+  version: "2.0"
+  description: |
+    Azure AD OAuth2 token endpoint used for the client-credentials flow.
+    Reference: https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
+servers:
+  - url: https://login.microsoftonline.com
+
+paths:
+  /{tenantId}/oauth2/v2.0/token:
+    post:
+      operationId: acquireToken
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+                - client_id
+                - client_secret
+                - scope
+              properties:
+                grant_type:
+                  type: string
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+                scope:
+                  type: string
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "4XX":
+          description: Auth error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenError"
+
+components:
+  schemas:
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - expires_in
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+        scope:
+          type: string
+
+    TokenError:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
