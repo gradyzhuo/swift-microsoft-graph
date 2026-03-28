@@ -52,6 +52,59 @@ paths:
           $ref: "#/components/responses/error"
       x-ms-docs-operation-type: operation
 
+  /{tenantId}/oauth2/v2.0/token:
+    post:
+      operationId: exchangeCodeForToken
+      description: |
+        Exchange an authorization code for tokens using the Azure AD authorization-code flow.
+        NOTE: pass serverURL: https://login.microsoftonline.com when creating the Client.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+                - client_id
+                - client_secret
+                - code
+                - redirect_uri
+              properties:
+                grant_type:
+                  type: string
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+                code:
+                  type: string
+                redirect_uri:
+                  type: string
+                code_verifier:
+                  type: string
+                scope:
+                  type: string
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AzureADTokenResponse"
+        "4XX":
+          description: Auth error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AzureADTokenError"
+
 components:
   schemas:
     microsoft.graph.user:
@@ -117,6 +170,31 @@ components:
         code:
           type: string
         message:
+          type: string
+
+    AzureADTokenResponse:
+      type: object
+      required:
+        - access_token
+        - expires_in
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+        scope:
+          type: string
+        refresh_token:
+          type: string
+
+    AzureADTokenError:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
           type: string
 
   responses:

@@ -1,4 +1,5 @@
 import Foundation
+import OpenAPIAsyncHTTPClient
 
 public actor GraphTokenProvider {
     private struct CachedToken {
@@ -11,9 +12,14 @@ public actor GraphTokenProvider {
 
     private let credential: GraphCredential
     private var cachedToken: CachedToken?
+    private let apiClient: Client
 
     public init(credential: GraphCredential) {
         self.credential = credential
+        self.apiClient = Client(
+            serverURL: URL(string: "https://login.microsoftonline.com")!,
+            transport: AsyncHTTPClientTransport()
+        )
     }
 
     public func accessToken() async throws -> String {
@@ -26,33 +32,36 @@ public actor GraphTokenProvider {
     }
 
     private func fetchToken() async throws -> CachedToken {
-        let url = URL(string: "https://login.microsoftonline.com/\(credential.tenantId)/oauth2/v2.0/token")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.httpBody = [
-            "grant_type=client_credentials",
-            "client_id=\(credential.clientId)",
-            "client_secret=\(credential.clientSecret)",
-            "scope=https%3A%2F%2Fgraph.microsoft.com%2F.default",
-        ].joined(separator: "&").data(using: .utf8)
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            let http = response as? HTTPURLResponse
-            let body = String(data: data, encoding: .utf8) ?? ""
-            throw GraphError.authenticationFailed(statusCode: http?.statusCode ?? 0, body: body)
-        }
-
-        let decoded = try JSONDecoder().decode(TokenResponse.self, from: data)
-        return CachedToken(
-            accessToken: decoded.access_token,
-            expiresAt: Date().addingTimeInterval(TimeInterval(decoded.expires_in))
+        let response = try await apiClient.acquireToken(
+            path: .init(tenantId: credential.tenantId),
+            body: .urlEncodedForm(.init(
+                grant_type: "client_credentials",
+                client_id: credential.clientId,
+                client_secret: credential.clientSecret,
+                scope: "https://graph.microsoft.com/.default"
+            ))
         )
+        switch response {
+        case .ok(let ok):
+            switch ok.body {
+            case .json(let token):
+                return CachedToken(
+                    accessToken: token.access_token,
+                    expiresAt: Date().addingTimeInterval(TimeInterval(token.expires_in))
+                )
+            }
+        case .clientError(let statusCode, let err):
+            let body: String
+            if case .json(let e) = err.body {
+                body = e.error_description ?? e.error ?? ""
+            } else {
+                body = ""
+            }
+            throw GraphError.authenticationFailed(statusCode: statusCode, body: body)
+        case .serverError(let statusCode, _):
+            throw GraphError.authenticationFailed(statusCode: statusCode, body: "")
+        case .undocumented(let statusCode, _):
+            throw GraphError.authenticationFailed(statusCode: statusCode, body: "")
+        }
     }
-}
-
-private struct TokenResponse: Decodable {
-    let access_token: String
-    let expires_in: Int
 }

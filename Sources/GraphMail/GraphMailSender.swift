@@ -1,7 +1,7 @@
 import Foundation
 import GraphAuth
 import GraphClient
-import OpenAPIURLSession
+import OpenAPIAsyncHTTPClient
 
 public struct GraphMailSender: Sendable {
     private let apiClient: Client
@@ -10,7 +10,7 @@ public struct GraphMailSender: Sendable {
     public init(client: GraphClient, senderEmail: String) {
         self.apiClient = Client(
             serverURL: URL(string: "https://graph.microsoft.com")!,
-            transport: URLSessionTransport(),
+            transport: AsyncHTTPClientTransport(),
             middlewares: [client.makeBearerMiddleware()]
         )
         self.senderEmail = senderEmail
