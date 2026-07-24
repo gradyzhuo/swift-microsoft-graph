@@ -25,7 +25,8 @@ public struct GraphOAuthClient: Sendable {
     public func exchangeCodeForToken(
         code: String,
         codeVerifier: String,
-        scopes: [String]
+        scopes: [String],
+        redirectURI: String? = nil
     ) async throws -> GraphOAuthTokenResponse {
         let response = try await azureClient.exchangeCodeForToken(
             path: .init(tenantId: config.tenantId),
@@ -34,7 +35,7 @@ public struct GraphOAuthClient: Sendable {
                 client_id: config.clientId,
                 client_secret: config.clientSecret,
                 code: code,
-                redirect_uri: config.redirectURI,
+                redirect_uri: redirectURI ?? config.redirectURI,
                 code_verifier: codeVerifier,
                 scope: scopes.joined(separator: " ")
             ))
