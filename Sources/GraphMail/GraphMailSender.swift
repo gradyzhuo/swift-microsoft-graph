@@ -32,6 +32,13 @@ public struct GraphMailSender: Sendable {
             body: .json(payload)
         )
         switch response {
+        case .undocumented(let statusCode, _) where (200..<300).contains(statusCode):
+            // Graph sendMail returns 202 Accepted on success (per Microsoft's
+            // documentation), but the bundled OpenAPI spec only declares 204,
+            // so 202 surfaces as .undocumented. Treat any 2xx as success —
+            // otherwise every real successful send is misreported as a failure
+            // and callers retry with duplicate mail.
+            return
         case .noContent:
             return
         case .clientError(let statusCode, _), .serverError(let statusCode, _),
